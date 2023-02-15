@@ -1,0 +1,87 @@
+# Objective: Find the relationship between monthly Certificate of Entitlement (COE_ premiums & monthly mean quota issued for Vehicle Category A & Category B.
+# Plot 2 line cum bar charts, one for Category A & the other for Category B.
+# To obtain 1 single value to represent the monthly quota number for Category A & for Category B, mean value will be calculated based on the 2 quota numbers fro 2 bidding exercises on each month (using Pandas functions). 
+# Only recent 5-year data dated from Jan 2018 to Dec 2022 would be used.
+# File used: M11-coe_results obtained from LTA website
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+#Import M11-coe_results.csv file obtained from LTA website
+df = pd.read_csv('M11-coe_results.csv')
+
+# Delete first 959 rows, in order to capture data belonging from year 2018 to 2022
+df_data = df.drop(df.index[range(960)])
+
+#Derive Mean values from 2 bidding exercises carried out in each month for all vehicle categories
+df_data_mean = df_data.groupby(by=['month','vehicle_class']).mean()
+
+# Export Pandas DataFrame (i.e. df_data_mean) to a CSV file called M11-coe_results_mean
+df = pd.DataFrame(df_data_mean)
+df.to_csv(r'C:\Users\Kerene\Desktop\Intro to Programming\CA2\data\M11-coe_results_mean.csv', index=True, header=True)
+
+#Import newly-created customised file: M11-coe_results_mean file
+df_quota = pd.read_csv('M11-coe_results_mean.csv')
+
+#Subsetting rows by boolean logic for Category A under vehicle_class column
+df_quota_CatA = df_quota[df_quota.vehicle_class == 'Category A']
+
+#Subsetting rows by boolean logic for Category B under vehicle_class column
+df_quota_CatB = df_quota[df_quota.vehicle_class == 'Category B']
+
+# Plot Line chart cum Bar chart to show relationship between monthly COE prices & monthly mean quota issued for Category A 
+labels = df_quota_CatA['month']  
+x = list(range(len(labels)))
+coe_price_a = df_quota_CatA['premium']
+number_quota_a = df_quota_CatA['quota']
+
+# Create a figure and axis #1
+fig, ax1 = plt.subplots(figsize=(15, 15))
+plt.title('COE Prices vs New Quotas Issued For Category A (Monthly)', fontsize = 15,fontweight='bold')
+
+# plot line chart on axis #1
+ax1.plot(x, coe_price_a, linewidth=1.5, color='blue') 
+ax1.set_ylabel('Monthly COE Prices')
+ax1.legend(['COE Prices'], loc="upper left")
+ax1.set_xlabel('Months')
+plt.grid(axis='y')
+plt.xticks(x,labels, rotation= 90, ha='right')
+
+# set up the 2nd axis
+ax2 = ax1.twinx()
+
+# plot bar chart on axis #2
+ax2.bar(x, number_quota_a, width=0.5, alpha=0.5, color='teal')
+ax2.grid(False) # turn off grid #2
+ax2.set_ylabel('Monthly Quotas Issued')
+ax2.legend(['Quotas Issued'], loc="upper right")
+plt.show()
+
+# Plot Line chart cum Bar chart to show relationship between monthly COE prices & monthly mean quota issued for Category B 
+labels = df_quota_CatB['month']  
+x = list(range(len(labels)))
+coe_price_b = df_quota_CatB['premium']
+number_quota_b = df_quota_CatB['quota']
+
+# Create a figure and axis #1
+fig, ax1 = plt.subplots(figsize=(15, 15))
+plt.title('COE Prices vs New Quotas Issued For Category B (Monthly)', fontsize = 15,fontweight='bold')
+
+# plot line chart on axis #1
+ax1.plot(x, coe_price_b, linewidth=1.5, color='brown') 
+ax1.set_ylabel('Monthly COE Prices')
+ax1.legend(['COE Prices'], loc="upper left")
+ax1.set_xlabel('Months')
+plt.ylim(0,120000)
+plt.grid(axis='y')
+plt.xticks(x,labels, rotation= 90, ha='right')
+
+# set up the 2nd axis
+ax2 = ax1.twinx()
+
+# plot bar chart on axis #2
+ax2.bar(x, number_quota_b, width=0.5, alpha=0.5, color='orange')
+ax2.grid(False) # turn off grid #2
+ax2.set_ylabel('Monthly Quotas Issued')
+ax2.legend(['Quotas Issued'], loc="upper right")
+plt.show()
