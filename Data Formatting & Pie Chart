@@ -1,0 +1,68 @@
+# Find out how the proportion of cars (under Cars and Station-wagons category) for various uses has changed over the past 5 years (from 2018 to 2022)
+# 2 Piecharts will be plotted, 1 to represent year 2018 and another to represent 2022, for comparision
+# File used: MVP01-1_MVP_by_type.csv file obtained from LTA website & annual-motor-vehicle-population-by-vehicle-type.csv file obtained from data.gov.sg
+# Time period covered: 2018 to 2022
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# File (1): df_pop_new refers to up-to-date data obtained from LTA website with latest data until Dec 2022
+# File (2): df_pop_orig refers to original data obtained from data.gov.sg with latest data until Apr 2020
+
+df_pop_orig = pd.read_csv('annual-motor-vehicle-population-by-vehicle-type.csv')
+df_pop_new = pd.read_csv('MVP01-1_MVP_by_type.csv')
+
+# Capture 2021 & 2022 data from df_pop_new 
+df_pop_new_filter = df_pop_new.loc[328:370]    
+
+# Append all columns by taking 2021 & 2022 data from df_pop_new & combine with df_pop_orig
+df_concat = pd.concat([df_pop_orig,df_pop_new_filter])
+
+### Delete first 264 rows, in order to capture data belonging from year 2018 to 2022
+df_concat_drop = df_concat.drop(df_concat.index[range(265)])
+
+# Sort data by category in alphabetical order, followed by the year in descending order (by default)
+df_concat_sort = df_concat_drop.sort_values(by=["category","year"])
+
+# Export Pandas DataFrame (i.e. df_concat_drop) to a CSV file called MVP01-1_MVP_by_type_New
+df = pd.DataFrame(df_concat_sort)
+df.to_csv(r'C:\Users\Kerene\Desktop\Intro to Programming\CA2\data\MVP01-1_MVP_by_type_New.csv', index=False, header=True)
+
+#Import newly-created customised file: MVP01-1_MVP_by_type_New file
+df_MVP_new = pd.read_csv('MVP01-1_MVP_by_type_New.csv')
+
+#Extract rows containing 2018 and 2022
+car_2018 = df_MVP_new[df_MVP_new['year']==2018]
+car_2022 = df_MVP_new[df_MVP_new['year']==2022]
+
+##### Plot PieChart showing breakdown of Cars and Station-wagons for 2018 and for 2022 #####
+
+#Extract rows containing all car types under Cars and Station-wagons category
+types = ['Private cars','Company cars','Tuition cars','Private Hire (Self-Drive) cars','Private Hire (Chauffeur) cars','Off peak cars']
+
+#Narrowing down to vehicle population dated in 2018 and 2022
+car_2018_final = car_2018[car_2018.type.isin(types)]
+car_2022_final = car_2022[car_2022.type.isin(types)]
+
+labels_2018 = car_2018_final['type']
+values_2018 = car_2018_final['number']
+
+labels_2022 = car_2022_final['type']
+values_2022 = car_2022_final['number']
+
+# To make the wedge (that represents the biggest portion) of the pie chart to stand out.
+explode = (0.1,0,0,0,0,0)
+
+# Plot Pie Chart for 2018
+plt.figure(figsize=(10,5))
+plt.pie(values_2018,labels=labels_2018, explode=explode,autopct=lambda p:format(p,'.1f') if p>3 else None)  #turn off labels whose values are less than 3%
+plt.title('Population of Cars by Usage Type In 2018', fontsize = 15,fontweight='bold') 
+plt.legend (loc="upper center",bbox_to_anchor=(0.5,-0.04),ncol=2)  # position the legend box directly below the pie chart
+
+# Plot Pie Chart for 2022
+plt.figure(figsize=(10,5))
+plt.pie(values_2022,labels=labels_2022, explode=explode,autopct=lambda p:format(p,'.1f') if p>4 else None)   #turn off labels whose values are less than 4%
+plt.title('Population of Cars by Usage Type In 2022', fontsize = 15,fontweight='bold')
+plt.legend (loc="upper center",bbox_to_anchor=(0.5,-0.04),ncol=2)  # position the legend box directly below the pie chart
+plt.tight_layout()
+plt.show()
